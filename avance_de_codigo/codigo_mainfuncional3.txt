@@ -1,0 +1,199 @@
+CODIGO FUNCIONAL CON PERMISOS, SE CIERRA SOLO 
+package com.example.prueba_opencv
+
+import android.os.Bundle
+import android.util.Log
+import android.view.SurfaceView
+import android.view.WindowManager
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import org.opencv.android.CameraBridgeViewBase
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame
+import org.opencv.android.OpenCVLoader
+import org.opencv.core.Mat
+
+//permisos
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import android.Manifest
+import android.content.pm.PackageManager
+
+//resolucion
+import org.opencv.android.CameraActivity
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2
+
+//escala de grises
+import org.opencv.core.CvType
+import org.opencv.imgproc.Imgproc
+
+//desenfoque gaussiano para disminuir el ruido 
+import org.opencv.core.Size
+
+//region de interes
+import org.opencv.core.Point
+import org.opencv.core.Scalar
+import org.opencv.core.Core
+import org.opencv.core.MatOfPoint
+
+
+
+class MainActivity : CameraActivity(), CvCameraViewListener2 {
+
+    private val TAG = "OCVSample::Activity"
+    private var mOpenCvCameraView: CameraBridgeViewBase? = null
+
+    private val REQUEST_CAMERA_PERMISSION = 100 // Código de solicitud de permiso
+
+    init {
+        Log.i(TAG, "Instantiated new ${this::class.java}")
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.i(TAG, "called onCreate")
+
+        // Verificar y solicitar permiso de cámara
+        checkCameraPermission()
+
+        mOpenCvCameraView?.post {
+            // Ajustar la resolución de la cámara a 640x480
+            mOpenCvCameraView?.setMaxFrameSize(320, 240)
+        }
+
+        setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        if (OpenCVLoader.initDebug()) Log.d("OpenCV2003", "SUCCESS");
+        else Log.d("OpenCV2003", "ERROR")
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) //pantalla siempre encendida
+
+        setContentView(R.layout.activity_main)
+
+        mOpenCvCameraView = findViewById(R.id.tutorial1_activity_java_surface_view)
+        mOpenCvCameraView?.visibility = SurfaceView.VISIBLE
+        mOpenCvCameraView?.setCvCameraViewListener(this)
+
+    }
+
+    /////////////////////////////////////////////////////////
+    private fun checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            // El permiso no está concedido, solicitarlo
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION)
+        } else {
+            // El permiso ya ha sido concedido
+            useCamera()
+        }
+    }
+
+    private fun useCamera() {
+        // Aquí puedes iniciar la funcionalidad que requiere la cámara
+        mOpenCvCameraView?.enableView() // Habilitar la vista de la cámara
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_CAMERA_PERMISSION -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permiso concedido, puedes usar la cámara
+                    useCamera()
+                } else {
+                    // Permiso denegado, maneja la situación (por ejemplo, mostrando un mensaje al usuario)
+                    Log.e(TAG, "Permiso de cámara denegado")
+                }
+            }
+        }
+    }
+
+    ////////////////////////////////////////////
+
+    override fun onPause() {
+        super.onPause()
+        mOpenCvCameraView?.disableView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mOpenCvCameraView?.enableView()
+    }
+
+    override fun getCameraViewList(): MutableList<CameraBridgeViewBase> {
+        return mutableListOf<CameraBridgeViewBase>().apply {
+            mOpenCvCameraView?.let { add(it) }  // Solo se añade si no es nulo
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mOpenCvCameraView?.disableView()
+    }
+
+    override fun onCameraViewStarted(width: Int, height: Int) {}
+
+    override fun onCameraViewStopped() {}
+
+    override fun onCameraFrame(inputFrame: CvCameraViewFrame): Mat {
+        val mat = inputFrame.rgba() //escala de grises
+        return processFrame(mat) // Procesa el frame con detección de bordes
+    }
+
+    // Método para procesar el frame
+    private fun processFrame(mat: Mat): Mat {
+        // 1. Convertir a escala de grises
+        val gray = Mat(mat.rows(), mat.cols(), CvType.CV_8UC1)
+        Imgproc.cvtColor(mat, gray, Imgproc.COLOR_RGBA2GRAY)
+
+        // 2. Aplicar desenfoque gaussiano para reducir ruido
+        val blurred = Mat(mat.rows(), mat.cols(), CvType.CV_8UC1)
+        Imgproc.GaussianBlur(gray, blurred, Size(5.0, 5.0), 0.0) //puedo AUMENTAR el desenfoque para eliminar ruido ejem(7,7)
+
+        // 3. Aplicar detección de bordes por Canny
+        val edges = Mat(mat.rows(), mat.cols(), CvType.CV_8UC1)
+        Imgproc.Canny(blurred, edges, 150.0, 250.0) // AUMENTAR los valores y mantener un rango de 100 disminuye el ruido ejem(200, 300) y disminuye los detalles inecesarios, funciona 100 y 200
+
+        // 4. Aplicar una máscara para la región de interés (ROI), parte inferior de la pantalla
+        val mask = Mat.zeros(edges.size(), CvType.CV_8UC1)
+        val points = MatOfPoint(
+            Point(edges.cols() * 0.35, edges.rows().toDouble()),          // Parte inferior izquierda
+            Point(edges.cols() * 0.35, edges.rows() * 0.5),              // Parte superior izquierda (más alta)
+            Point(edges.cols() * 0.65, edges.rows() * 0.5),              // Parte superior derecha (más alta)
+            Point(edges.cols() * 0.65, edges.rows().toDouble())
+        )
+
+        Imgproc.fillPoly(mask, listOf(points), Scalar(255.0)) // mascara para enfocar solo en la region anterior
+        val maskedEdges = Mat()
+        Core.bitwise_and(edges, mask, maskedEdges)
+
+        // 5. Crear una matriz negra para dibujar las líneas
+        val blackMat = Mat.zeros(mat.size(), mat.type()) // Matriz negra del tamaño de la imagen original
+
+        // 5. Detectar líneas usando la transformada de Hough
+        val lines = Mat()
+        Imgproc.HoughLinesP(maskedEdges, lines, 1.8, Math.PI / 180, 100, 150.0, 10.0) // 1.5, 100, 100, 10
+        //AUMENTAR rho reducir la precisión en la detección de líneas, pero mejorar el rendimiento. (entre 1-2)
+        //MANTENER valor angular theta, Un valor menor ofrece una mayor precisión angular.
+        //AUMENTAR threshold detectará solo las líneas más prominentes, mientras que un valor más bajo detectará más líneas, incluidas las más débiles. (en prueba subir valor)
+        //AUMENTAR minline.Ajusta este valor según el tamaño de las líneas que deseas detectar. Si los carriles son claros y largos, puedes aumentar este valor.
+        //AUMENTAR maxline si se tienen carriles interrumpidos (curvas en el CDU)
+
+        // 6. Dibujar las líneas detectadas sobre la imagen original. matriz lines
+        for (i in 0 until lines.rows()) {
+            val l = lines.get(i, 0)
+            Imgproc.line(
+                blackMat,  // Dibuja sobre la imagen original
+                Point(l[0], l[1]), Point(l[2], l[3]),
+                Scalar(0.0, 255.0, 0.0), 3  // Color verde y grosor de la línea
+            )
+        }
+
+        return blackMat // Devolver la imagen con las líneas de carriles dibujadas
+    }
+}

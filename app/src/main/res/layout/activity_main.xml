@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#345A75"
+    android:orientation="vertical"
+    android:gravity="top">
+
+    <!-- Menú superior -->
+    <TextView
+        android:id="@+id/adminOptions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="16dp"
+        android:text="Opciones admin"
+        android:textColor="#000000"
+        android:textSize="20sp" />
+
+    <!-- Línea de subrayado -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="#000000" />
+
+    <!-- Espacio flexible arriba del botón para centrarlo -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Botón circular centrado en pantalla -->
+    <Button
+        android:id="@+id/buttonToSecond"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center"
+        android:background="@drawable/round_button"
+        android:text="INICIAR"
+        android:textColor="#000077"
+        android:textSize="50sp" />
+
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
