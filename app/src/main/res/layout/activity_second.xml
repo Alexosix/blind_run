@@ -1,56 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="#FFFFFF"
+    android:gravity="top"
+    android:orientation="vertical">
 
+    <!-- Vista de la cámara en el fondo -->
     <org.opencv.android.JavaCameraView
         android:id="@+id/camera_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"
-        opencv:show_fps="true"
-        opencv:camera_id="any"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:scaleType="fitXY"/>
+        opencv:camera_id="any" />
 
-    <TextView
-        android:id="@+id/distanceLeftTextView"
-        android:layout_width="150dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="16dp"
-        android:padding="16dp"
-        android:text=" 0 "
+    <!-- Vista superpuesta para cubrir la cámara -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF" /> <!-- Fondo semitransparente: negro con 50% de opacidad -->
+
+    <!-- Botón superpuesto en el centro -->
+    <Button
+        android:id="@+id/buttonBackToMain"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center"
+        android:backgroundTint="#FF1111"
+        android:text="PARAR"
         android:textColor="#FFFFFF"
-        android:textSize="25sp"
+        android:padding="0dp"
         android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.498" />
-
-    <TextView
-        android:id="@+id/distanceRightTextView"
-        android:layout_width="150dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="176dp"
-        android:padding="16dp"
-        android:text=" 0 "
-        android:textColor="#FFFFFF"
-        android:textSize="25sp"
-        android:gravity="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.962"
-        app:layout_constraintStart_toEndOf="@+id/distanceLeftTextView"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:textSize="70sp"
+        android:clipToOutline="true"
+        android:outlineProvider="background"
+        android:elevation="300dp"
+        android:translationZ="12dp" />
+</FrameLayout>

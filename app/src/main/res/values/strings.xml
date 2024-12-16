@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">prueba_opencv</string>
+    <string name="funcionamiento_app">Funcionamiento APP</string>
+
+    <string-array name="tonalidades_array">
+        <item>d4.wav</item>
+        <item>e4.wav</item>
+        <item>f4.wav</item>
+        <item>a4.wav</item>
+
+    </string-array>
+
 </resources>

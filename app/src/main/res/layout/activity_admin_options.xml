@@ -7,42 +7,40 @@
     android:padding="16dp"
     android:gravity="center">
 
+    <!-- Título -->
     <TextView
         android:id="@+id/textViewAdminTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Opciones del Administrador"
+        android:text="Opciones"
         android:textColor="#000000"
         android:textSize="24sp"
         android:textStyle="bold"
         android:padding="16dp"
         android:gravity="center"/>
 
-    <!-- Opción 1 -->
-    <Button
-        android:id="@+id/option1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Opción 1"
-        android:layout_marginTop="20dp"
-        android:textSize="18sp"/>
-
     <!-- Opción 2 -->
     <Button
         android:id="@+id/option2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Opción 2"
         android:layout_marginTop="20dp"
-        android:textSize="18sp"/>
-
+        android:backgroundTint="#FF1111"
+        android:text="Funcionamiento"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
     <!-- Opción 3 -->
     <Button
         android:id="@+id/option3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Opción 3"
         android:layout_marginTop="20dp"
-        android:textSize="18sp"/>
+        android:backgroundTint="#FF1111"
+        android:text="Creditos"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
+
+    <!-- Spinner para seleccionar tono -->
+
 
 </LinearLayout>
